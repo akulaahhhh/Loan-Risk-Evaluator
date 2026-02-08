@@ -113,9 +113,14 @@ const FireCanvas = memo(({ intensity }) => {
     const ctx = canvas.getContext('2d');
     let animationFrameId;
     
-    // Resize
-    canvas.width = canvas.offsetWidth;
-    canvas.height = canvas.offsetHeight;
+    // Resize handler to maintain responsiveness
+    const handleResize = () => {
+        canvas.width = canvas.offsetWidth;
+        canvas.height = canvas.offsetHeight;
+    };
+    
+    window.addEventListener('resize', handleResize);
+    handleResize(); // Initial size
 
     const particles = [];
     const particleCount = intensity * 200; 
@@ -160,7 +165,10 @@ const FireCanvas = memo(({ intensity }) => {
     };
 
     animate();
-    return () => cancelAnimationFrame(animationFrameId);
+    return () => {
+        window.removeEventListener('resize', handleResize);
+        cancelAnimationFrame(animationFrameId);
+    };
   }, [intensity]);
 
   return <canvas ref={canvasRef} className="absolute inset-0 w-full h-full pointer-events-none opacity-80 rounded-xl mix-blend-screen" />;
@@ -337,10 +345,10 @@ const Banker = memo(({ riskScore }) => {
   }
 
   return (
-    <div className={`relative w-full max-w-md aspect-square flex flex-col items-center justify-center p-8 border-4 rounded-3xl bg-gray-900 transition-all duration-500 ${borderColor} ${glowColor} overflow-hidden`}>
+    <div className={`relative w-full max-w-xs sm:max-w-md aspect-square flex flex-col items-center justify-center p-8 border-4 rounded-3xl bg-gray-900 transition-all duration-500 ${borderColor} ${glowColor} overflow-hidden`}>
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-gray-800 to-gray-950 -z-10"></div>
       {riskScore >= 60 && <FireCanvas intensity={riskScore / 100} />}
-      <div className="relative z-10 w-48 h-48 transition-all duration-500 transform hover:scale-105 filter drop-shadow-xl">
+      <div className="relative z-10 w-40 h-40 sm:w-48 sm:h-48 transition-all duration-500 transform hover:scale-105 filter drop-shadow-xl">
         <svg viewBox="0 0 200 200">
           <circle cx="100" cy="100" r="80" fill="#fcd34d" stroke="#111827" strokeWidth="4" />
           {emotion === 'happy' && (
@@ -370,8 +378,8 @@ const Banker = memo(({ riskScore }) => {
         </svg>
       </div>
       <div className="relative z-10 mt-6 text-center">
-        <h2 className={`text-3xl font-black uppercase tracking-tight ${textColor} transition-colors duration-300`}>{text}</h2>
-        <div className="mt-2 text-xl font-bold text-gray-400 font-mono">Risk Score: <span className="text-white">{riskScore.toFixed(1)}%</span></div>
+        <h2 className={`text-2xl sm:text-3xl font-black uppercase tracking-tight ${textColor} transition-colors duration-300`}>{text}</h2>
+        <div className="mt-2 text-lg sm:text-xl font-bold text-gray-400 font-mono">Risk Score: <span className="text-white">{riskScore.toFixed(1)}%</span></div>
       </div>
     </div>
   );
@@ -382,13 +390,13 @@ const Banker = memo(({ riskScore }) => {
  */
 const SliderRow = memo(({ field, value, onChange }) => {
   return (
-    <div className="bg-gray-800 p-5 rounded-2xl shadow-lg border border-gray-700 hover:border-gray-600 transition-colors">
+    <div className="bg-gray-800 p-4 sm:p-5 rounded-2xl shadow-lg border border-gray-700 hover:border-gray-600 transition-colors">
       <div className="flex justify-between items-center mb-3">
-        <label className="flex items-center gap-2 font-semibold text-gray-200">
+        <label className="flex items-center gap-2 font-semibold text-gray-200 text-sm sm:text-base">
           <div className="p-1.5 rounded-lg bg-gray-700 text-blue-400"><field.icon className="w-4 h-4" /></div>
           {field.label}
         </label>
-        <span className="text-blue-400 font-mono font-bold bg-gray-900 px-3 py-1 rounded-md border border-gray-700">
+        <span className="text-blue-400 font-mono font-bold bg-gray-900 px-3 py-1 rounded-md border border-gray-700 text-sm sm:text-base">
           {value} <span className="text-gray-500 text-xs">{MFS[field.id].unit}</span>
         </span>
       </div>
@@ -414,15 +422,15 @@ const RulesModal = ({ onClose, rules, ruleStrengths }) => {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm" onClick={onClose}>
       <div className="bg-gray-900 w-full max-w-2xl max-h-[80vh] rounded-2xl border border-gray-700 shadow-2xl overflow-hidden flex flex-col animate-in fade-in zoom-in duration-200" onClick={e => e.stopPropagation()}>
-        <div className="p-6 border-b border-gray-800 flex justify-between items-center bg-gray-900 sticky top-0 z-10">
-           <h3 className="text-xl font-bold text-white flex items-center gap-2">
+        <div className="p-4 sm:p-6 border-b border-gray-800 flex justify-between items-center bg-gray-900 sticky top-0 z-10">
+           <h3 className="text-lg sm:text-xl font-bold text-white flex items-center gap-2">
              <List className="text-blue-500" /> Active Rule Base
            </h3>
            <button onClick={onClose} className="p-2 hover:bg-gray-800 rounded-full text-gray-400 hover:text-white transition-colors">
              <X className="w-5 h-5" />
            </button>
         </div>
-        <div className="overflow-y-auto p-6 space-y-3">
+        <div className="overflow-y-auto p-4 sm:p-6 space-y-3">
           {rules.map((rule, idx) => {
              const strength = ruleStrengths[idx];
              const isActive = strength > 0;
@@ -549,17 +557,17 @@ export default function LoanRiskApp() {
       )}
 
       {view === 'input' ? (
-        <div className="flex flex-col lg:flex-row h-screen overflow-hidden">
+        <div className="flex flex-col lg:flex-row min-h-screen lg:h-screen lg:overflow-hidden">
           {/* Left Panel: Inputs */}
-          <div className="w-full lg:w-1/2 p-6 lg:p-10 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-transparent">
+          <div className="w-full lg:w-1/2 p-4 md:p-6 lg:p-10 lg:overflow-y-auto scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-transparent">
             <header className="mb-8">
-              <h1 className="text-4xl font-black text-white flex items-center gap-3 tracking-tighter">
+              <h1 className="text-2xl md:text-4xl font-black text-white flex items-center gap-3 tracking-tighter">
                 <div className="bg-blue-600 p-2 rounded-xl text-white shadow-lg shadow-blue-900/50">
                    <Zap className="w-6 h-6" />
                 </div>
-                RiskAI <span className="text-gray-600 text-lg font-medium self-end mb-1">Simulator v2.0</span>
+                RiskAI <span className="text-gray-600 text-base md:text-lg font-medium self-end mb-1">Simulator v2.0</span>
               </h1>
-              <p className="text-gray-400 mt-2 ml-1">Advanced fuzzy logic inference engine.</p>
+              <p className="text-gray-400 mt-2 ml-1 text-sm md:text-base">Advanced fuzzy logic inference engine.</p>
             </header>
 
             <div className="space-y-6">
@@ -575,13 +583,13 @@ export default function LoanRiskApp() {
           </div>
 
           {/* Right Panel: Visualization */}
-          <div className="w-full lg:w-1/2 bg-gray-900 flex flex-col items-center justify-center relative overflow-hidden">
+          <div className="w-full lg:w-1/2 bg-gray-900 flex flex-col items-center justify-center relative min-h-[500px] lg:h-full lg:overflow-hidden">
              <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'radial-gradient(#4b5563 1px, transparent 1px)', backgroundSize: '30px 30px' }}></div>
              
              <div className="relative z-10 p-6 flex flex-col items-center gap-6 w-full max-w-md">
                <Banker riskScore={computation.centroid} />
                
-               <div className="grid grid-cols-2 gap-4 w-full">
+               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full">
                   <button 
                     onClick={() => setShowRules(true)}
                     className="py-4 bg-gray-800 text-gray-200 rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-gray-700 hover:text-white transition-all border border-gray-700 hover:border-gray-500 active:scale-[0.98]"
@@ -599,7 +607,7 @@ export default function LoanRiskApp() {
           </div>
         </div>
       ) : (
-        <div className="min-h-screen p-6 lg:p-12 bg-gray-950">
+        <div className="min-h-screen p-4 md:p-8 lg:p-12 bg-gray-950">
           <div className="max-w-[1400px] mx-auto">
             <div className="flex justify-between items-center mb-8">
                 <button 
@@ -617,19 +625,19 @@ export default function LoanRiskApp() {
                 </button>
             </div>
 
-            <h1 className="text-5xl font-black text-white mb-2 tracking-tighter">Inference Logic Trace</h1>
-            <p className="text-gray-400 mb-12 text-lg">Mamdani-style breakdown of fuzzy implication for risk score <span className="text-blue-400 font-bold">{computation.centroid.toFixed(1)}%</span>.</p>
+            <h1 className="text-3xl md:text-5xl font-black text-white mb-2 tracking-tighter">Inference Logic Trace</h1>
+            <p className="text-gray-400 mb-8 md:mb-12 text-base md:text-lg">Mamdani-style breakdown of fuzzy implication for risk score <span className="text-blue-400 font-bold">{computation.centroid.toFixed(1)}%</span>.</p>
 
             {/* Phase 1: Fuzzification (Simplified View) */}
-            <section className="mb-16">
-              <div className="flex items-center gap-4 mb-8">
-                <div className="w-12 h-12 rounded-2xl bg-gray-800 border border-gray-700 text-blue-400 flex items-center justify-center font-black text-xl shadow-lg">1</div>
+            <section className="mb-12 md:mb-16">
+              <div className="flex items-center gap-4 mb-6 md:mb-8">
+                <div className="w-10 h-10 md:w-12 md:h-12 rounded-2xl bg-gray-800 border border-gray-700 text-blue-400 flex items-center justify-center font-black text-lg md:text-xl shadow-lg">1</div>
                 <div>
-                  <h2 className="text-2xl font-bold text-white">Fuzzification Overview</h2>
-                  <p className="text-gray-500 text-sm">Crisp inputs mapped to fuzzy degrees.</p>
+                  <h2 className="text-xl md:text-2xl font-bold text-white">Fuzzification Overview</h2>
+                  <p className="text-gray-500 text-xs md:text-sm">Crisp inputs mapped to fuzzy degrees.</p>
                 </div>
               </div>
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
                 {Object.keys(inputs).map(key => (
                   <div key={key} className="bg-gray-800 p-4 rounded-xl border border-gray-700">
                     <div className="text-xs text-gray-500 uppercase font-bold mb-1">{FIELD_LABELS[key] || key}</div>
@@ -645,12 +653,12 @@ export default function LoanRiskApp() {
             </section>
 
             {/* Phase 2: Rule Evaluation (VISUAL UPGRADE) */}
-            <section className="mb-16">
-              <div className="flex items-center gap-4 mb-8">
-                <div className="w-12 h-12 rounded-2xl bg-gray-800 border border-gray-700 text-purple-400 flex items-center justify-center font-black text-xl shadow-lg">2</div>
+            <section className="mb-12 md:mb-16">
+              <div className="flex items-center gap-4 mb-6 md:mb-8">
+                <div className="w-10 h-10 md:w-12 md:h-12 rounded-2xl bg-gray-800 border border-gray-700 text-purple-400 flex items-center justify-center font-black text-lg md:text-xl shadow-lg">2</div>
                 <div>
-                  <h2 className="text-2xl font-bold text-white">Rule Evaluation (Mamdani Style)</h2>
-                  <p className="text-gray-500 text-sm">Visualizing Antecedents (AND) → Consequent Implication.</p>
+                  <h2 className="text-xl md:text-2xl font-bold text-white">Rule Evaluation (Mamdani Style)</h2>
+                  <p className="text-gray-500 text-xs md:text-sm">Visualizing Antecedents (AND) → Consequent Implication.</p>
                 </div>
               </div>
               
@@ -659,13 +667,13 @@ export default function LoanRiskApp() {
                   <div className="p-6 bg-yellow-900/20 text-yellow-500 border border-yellow-800 rounded-xl">No rules fired for these inputs.</div>
                 ) : (
                   computation.ruleResults.map((rule, idx) => (
-                    <div key={idx} className="bg-gray-900 p-6 rounded-2xl border border-gray-700 shadow-xl overflow-x-auto relative">
-                      <div className="flex flex-col gap-1 mb-6 sticky left-0 bg-gray-900/95 backdrop-blur py-2 z-10 border-b border-gray-800">
+                    <div key={idx} className="bg-gray-900 p-4 md:p-6 rounded-2xl border border-gray-700 shadow-xl overflow-x-auto relative">
+                      <div className="flex flex-col gap-1 mb-6 sticky left-0 bg-gray-900/95 backdrop-blur py-2 z-10 border-b border-gray-800 min-w-fit">
                           <div className="flex items-center gap-3">
                              <span className="bg-blue-900/30 text-blue-400 border border-blue-800 text-xs uppercase font-bold px-2 py-1 rounded">Rule {idx + 1}</span>
-                             <span className="text-gray-500 text-xs italic">Description: "{rule.desc}"</span>
+                             <span className="text-gray-500 text-xs italic whitespace-nowrap">Description: "{rule.desc}"</span>
                           </div>
-                          <div className="text-gray-300 font-mono text-sm leading-relaxed mt-1">
+                          <div className="text-gray-300 font-mono text-sm leading-relaxed mt-1 whitespace-nowrap">
                              <span className="text-blue-400 font-bold">IF</span> {Object.entries(rule.if).map(([k, v], i, arr) => (
                                  <span key={k}>
                                      {FIELD_LABELS[k] || k} is <span className="text-white font-bold">{v}</span>
@@ -675,7 +683,7 @@ export default function LoanRiskApp() {
                           </div>
                       </div>
                       
-                      <div className="flex items-center gap-4 min-w-max">
+                      <div className="flex items-center gap-4 min-w-max pb-4">
                         {/* Antecedents */}
                         {rule.antecedents.map((ant, i) => (
                             <React.Fragment key={i}>
@@ -720,21 +728,21 @@ export default function LoanRiskApp() {
             </section>
 
             {/* Phase 3 & 4: Aggregation */}
-            <section className="mb-16">
-              <div className="flex items-center gap-4 mb-8">
-                <div className="w-12 h-12 rounded-2xl bg-gray-800 border border-gray-700 text-green-400 flex items-center justify-center font-black text-xl shadow-lg">3</div>
+            <section className="mb-12 md:mb-16">
+              <div className="flex items-center gap-4 mb-6 md:mb-8">
+                <div className="w-10 h-10 md:w-12 md:h-12 rounded-2xl bg-gray-800 border border-gray-700 text-green-400 flex items-center justify-center font-black text-lg md:text-xl shadow-lg">3</div>
                 <div>
-                  <h2 className="text-2xl font-bold text-white">Aggregation & Defuzzification</h2>
-                  <p className="text-gray-500 text-sm">Combining outputs (MAX) & finding the Centroid.</p>
+                  <h2 className="text-xl md:text-2xl font-bold text-white">Aggregation & Defuzzification</h2>
+                  <p className="text-gray-500 text-xs md:text-sm">Combining outputs (MAX) & finding the Centroid.</p>
                 </div>
               </div>
               
-              <div className="bg-gray-800 p-8 rounded-3xl border border-gray-700 shadow-2xl relative overflow-hidden">
+              <div className="bg-gray-800 p-4 md:p-8 rounded-3xl border border-gray-700 shadow-2xl relative overflow-hidden">
                 <div className="absolute top-0 right-0 p-8 opacity-5">
                    <Activity className="w-64 h-64 text-white" />
                 </div>
 
-                <div className="w-full h-80 relative mb-8 z-10 pl-8 pb-8">
+                <div className="w-full h-64 sm:h-80 md:h-96 relative mb-8 z-10 md:pl-8 pb-8">
                   <svg width="100%" height="100%" viewBox="0 0 800 300" className="overflow-visible">
                     <GradientDefs />
                     {/* Grid */}
@@ -802,23 +810,23 @@ export default function LoanRiskApp() {
                   </svg>
                 </div>
                 
-                <div className="relative z-10 flex flex-col md:flex-row items-center justify-between p-6 bg-gray-900/80 backdrop-blur-md rounded-2xl border border-gray-700">
-                  <div className="flex items-center gap-4">
+                <div className="relative z-10 flex flex-col md:flex-row items-center justify-between p-4 md:p-6 bg-gray-900/80 backdrop-blur-md rounded-2xl border border-gray-700">
+                  <div className="flex items-center gap-4 mb-4 md:mb-0">
                      <div className="p-3 bg-gray-800 rounded-lg text-green-400">
                         <Calculator className="w-6 h-6" />
                      </div>
                      <div>
                         <h4 className="font-bold text-gray-200">Defuzzification Result</h4>
-                        <p className="text-sm text-gray-500">Method: Center of Gravity (Centroid)</p>
+                        <p className="text-xs md:text-sm text-gray-500">Method: Center of Gravity (Centroid)</p>
                      </div>
                   </div>
-                  <div className="text-right mt-4 md:mt-0">
-                    <div className="text-sm text-gray-400 uppercase tracking-widest font-bold">Final Risk Score</div>
-                    <div className="flex items-end justify-end gap-2">
-                        <div className="text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-green-400">
+                  <div className="text-right">
+                    <div className="text-xs md:text-sm text-gray-400 uppercase tracking-widest font-bold">Final Risk Score</div>
+                    <div className="flex flex-col md:flex-row md:items-end justify-end gap-1 md:gap-2">
+                        <div className="text-4xl md:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-green-400">
                             {computation.centroid.toFixed(2)}%
                         </div>
-                        <div className="text-xl font-bold text-white mb-2">
+                        <div className="text-lg md:text-xl font-bold text-white mb-1 md:mb-2">
                              ({getRiskLabel(computation.centroid)})
                         </div>
                     </div>
